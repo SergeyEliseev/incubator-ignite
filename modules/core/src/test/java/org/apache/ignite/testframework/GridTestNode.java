@@ -17,6 +17,7 @@
 
 package org.apache.ignite.testframework;
 
+import org.apache.ignite.cache.*;
 import org.apache.ignite.cluster.*;
 import org.apache.ignite.internal.*;
 import org.apache.ignite.internal.util.lang.*;
@@ -54,6 +55,9 @@ public class GridTestNode extends GridMetadataAwareAdapter implements ClusterNod
 
     /** */
     private ClusterMetrics metrics;
+
+    /** */
+    private Collection<CacheMetrics> cacheMetrics = Collections.emptyList();
 
     /** */
     private long order;
@@ -184,6 +188,10 @@ public class GridTestNode extends GridMetadataAwareAdapter implements ClusterNod
     /** {@inheritDoc} */
     @Override public ClusterMetrics metrics() {
         return metrics;
+    }
+
+    @Override public Collection<CacheMetrics> cacheMetrics() {
+        return cacheMetrics;
     }
 
     /** {@inheritDoc} */

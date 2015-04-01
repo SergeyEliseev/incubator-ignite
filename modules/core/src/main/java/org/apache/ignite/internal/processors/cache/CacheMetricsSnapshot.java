@@ -23,7 +23,7 @@ import org.apache.ignite.internal.util.typedef.internal.*;
 /**
  * Metrics snapshot.
  */
-class CacheMetricsSnapshot implements CacheMetrics {
+public class CacheMetricsSnapshot implements CacheMetrics {
     /** Number of reads. */
     private long reads = 0;
 
@@ -176,6 +176,13 @@ class CacheMetricsSnapshot implements CacheMetrics {
 
     /** */
     private boolean isWriteThrough;
+
+    /**
+     * Default constructor.
+     */
+    public CacheMetricsSnapshot() {
+        // No-op.
+    }
 
     /**
      * Create snapshot for given metrics.

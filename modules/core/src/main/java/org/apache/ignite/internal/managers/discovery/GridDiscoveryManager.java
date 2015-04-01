@@ -18,6 +18,7 @@
 package org.apache.ignite.internal.managers.discovery;
 
 import org.apache.ignite.*;
+import org.apache.ignite.cache.*;
 import org.apache.ignite.cluster.*;
 import org.apache.ignite.events.*;
 import org.apache.ignite.internal.*;
@@ -26,6 +27,7 @@ import org.apache.ignite.internal.managers.*;
 import org.apache.ignite.internal.managers.communication.*;
 import org.apache.ignite.internal.managers.eventstorage.*;
 import org.apache.ignite.internal.processors.affinity.*;
+import org.apache.ignite.internal.processors.cache.*;
 import org.apache.ignite.internal.processors.jobmetrics.*;
 import org.apache.ignite.internal.processors.security.*;
 import org.apache.ignite.internal.util.*;
@@ -643,6 +645,21 @@ public class GridDiscoveryManager extends GridManagerAdapter<DiscoverySpi> {
                 nm.setOutboundMessagesQueueSize(io.getOutboundMessagesQueueSize());
 
                 return nm;
+            }
+
+            /** {@inheritDoc} */
+            @Override public Collection<CacheMetrics> cacheMetrics() {
+                Collection<GridCache<?, ?>> caches = ctx.cache().caches();
+
+                if (F.isEmpty(caches))
+                    return Collections.emptyList();
+
+                List<CacheMetrics> metrics = new ArrayList<>(caches.size());
+
+                for (GridCache<?, ?> cache : caches)
+                    metrics.add(cache.metrics());
+
+                return metrics;
             }
         };
     }
