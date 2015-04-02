@@ -479,14 +479,25 @@ public abstract class GridManagerAdapter<T extends IgniteSpi> implements GridMan
                                 return err;
                         }
 
+                        boolean defValidation = true;
+
                         for (PluginProvider pl : ctx.plugins().allProviders()) {
                             NodeValidator val = (NodeValidator) pl.createComponent(ctx.plugins().pluginContextForProvider(pl), NodeValidator.class);
 
-                            if (val != null)
-                                return val.validateNode(ctx.discovery().localNode(), node);
+                            if (val != null) {
+                                defValidation = false;
+
+                                IgniteSpiNodeValidationResult err = val.validateNode(ctx.discovery().localNode(), node);
+
+                                if (err != null)
+                                    return err;
+                            }
                         }
 
-                        return new NodeValidator().validateNode(ctx.discovery().localNode(), node);
+                        if (defValidation)
+                            return new NodeValidator().validateNode(ctx.discovery().localNode(), node);
+
+                        return null;
                     }
 
                     @Override public Collection<GridSecuritySubject> authenticatedSubjects() {
