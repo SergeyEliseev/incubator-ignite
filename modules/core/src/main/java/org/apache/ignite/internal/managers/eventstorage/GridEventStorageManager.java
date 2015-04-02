@@ -247,6 +247,8 @@ public class GridEventStorageManager extends GridManagerAdapter<EventStorageSpi>
      */
     public void record(Event evt) {
         assert evt != null;
+        
+        log.info(">>>>> Record event=" + evt);
 
         if (!enterBusy())
             return;
