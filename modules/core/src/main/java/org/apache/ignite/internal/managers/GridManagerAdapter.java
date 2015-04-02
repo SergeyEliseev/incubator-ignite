@@ -28,9 +28,11 @@ import org.apache.ignite.internal.util.tostring.*;
 import org.apache.ignite.internal.util.typedef.*;
 import org.apache.ignite.internal.util.typedef.internal.*;
 import org.apache.ignite.lang.*;
+import org.apache.ignite.plugin.*;
 import org.apache.ignite.plugin.extensions.communication.*;
 import org.apache.ignite.plugin.security.*;
 import org.apache.ignite.spi.*;
+import org.apache.ignite.spi.discovery.*;
 import org.apache.ignite.spi.swapspace.*;
 import org.jetbrains.annotations.*;
 
@@ -477,7 +479,14 @@ public abstract class GridManagerAdapter<T extends IgniteSpi> implements GridMan
                                 return err;
                         }
 
-                        return null;
+                        for (PluginProvider pl : ctx.plugins().allProviders()) {
+                            NodeValidator val = (NodeValidator) pl.createComponent(ctx.plugins().pluginContextForProvider(pl), NodeValidator.class);
+
+                            if (val != null)
+                                return val.validateNode(ctx.discovery().localNode(), node);
+                        }
+
+                        return new NodeValidator().validateNode(ctx.discovery().localNode(), node);
                     }
 
                     @Override public Collection<GridSecuritySubject> authenticatedSubjects() {
