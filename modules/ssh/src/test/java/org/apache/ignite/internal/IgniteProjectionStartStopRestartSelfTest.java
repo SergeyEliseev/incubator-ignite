@@ -176,9 +176,13 @@ public class IgniteProjectionStartStopRestartSelfTest extends GridCommonAbstract
     public void testStartOneNode() throws Exception {
         joinedLatch = new CountDownLatch(1);
 
+        Collection<Map<String, Object>> hosts = maps(Collections.singleton(HOST), SSH_UNAME, pwd, key, 1, U.getIgniteHome(), CFG_NO_ATTR, null);
+        
+        log.info(">>>>> hosts=" + hosts);
+        
         Collection<GridTuple3<String, Boolean, String>> res =
             startNodes(ignite.cluster(),
-                maps(Collections.singleton(HOST), SSH_UNAME, pwd, key, 1, U.getIgniteHome(), CFG_NO_ATTR, null),
+                hosts,
                 null, false, 0, 16);
 
         assert res.size() == 1;
