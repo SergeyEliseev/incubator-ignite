@@ -352,8 +352,8 @@ public abstract class GridSpiAbstractTest<T extends IgniteSpi> extends GridAbstr
             @Override public ClusterMetrics metrics() { return new ClusterMetricsSnapshot(); }
 
             /** {@inheritDoc} */
-            @Override public Collection<CacheMetrics> cacheMetrics() {
-                return Collections.<CacheMetrics>singletonList(new CacheMetricsSnapshot());
+            @Override public Map<String, CacheMetrics> cacheMetrics() {
+                return Collections.<String, CacheMetrics>singletonMap(null, new CacheMetricsSnapshot());
             }
         };
     }

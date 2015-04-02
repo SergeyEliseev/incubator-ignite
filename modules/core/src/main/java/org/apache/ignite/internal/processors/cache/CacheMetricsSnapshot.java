@@ -20,10 +20,16 @@ package org.apache.ignite.internal.processors.cache;
 import org.apache.ignite.cache.*;
 import org.apache.ignite.internal.util.typedef.internal.*;
 
+import java.io.*;
+import java.util.*;
+
 /**
  * Metrics snapshot.
  */
-public class CacheMetricsSnapshot implements CacheMetrics {
+public class CacheMetricsSnapshot implements CacheMetrics, Externalizable {
+    /** Last update time. */
+    private long lastUpdateTime = -1;
+
     /** Number of reads. */
     private long reads = 0;
 
@@ -246,6 +252,131 @@ public class CacheMetricsSnapshot implements CacheMetrics {
         isWriteThrough = m.isWriteThrough();
     }
 
+    /**
+     * Constructs merged cachemetrics.
+     *
+     * @param metrics Metrics for merge.
+     */
+    public CacheMetricsSnapshot(Collection<CacheMetrics> metrics) {
+        A.notEmpty(metrics, "metrics");
+
+        // TODO: Only once
+        /*
+        cacheName
+        isEmpty
+        isWriteBehindEnabled
+        writeBehindFlushSize
+        writeBehindFlushThreadCount
+        writeBehindFlushFrequency
+        writeBehindStoreBatchSize
+        writeBehindTotalCriticalOverflowCount
+        writeBehindCriticalOverflowCount
+        writeBehindErrorRetryCount
+        writeBehindBufferSize
+
+        keyType
+        valueType
+        isStoreByValue
+        isStatisticsEnabled
+        isManagementEnabled
+        isReadThrough
+        isWriteThrough
+         */
+
+        //TODO: How to merge?
+        /*
+        overflowSize
+        size (only once PRIMARY?)
+         */
+
+        boolean first = true;
+
+        for (CacheMetrics e : metrics) {
+
+            if (first) {
+                cacheName = e.name();
+                isEmpty = e.isEmpty();
+                isWriteBehindEnabled = e.isWriteBehindEnabled();
+                writeBehindFlushSize = e.getWriteBehindFlushSize();
+                writeBehindFlushThreadCount = e.getWriteBehindFlushThreadCount();
+                writeBehindFlushFrequency = e.getWriteBehindFlushFrequency();
+                writeBehindStoreBatchSize = e.getWriteBehindStoreBatchSize();
+                writeBehindTotalCriticalOverflowCount = e.getWriteBehindTotalCriticalOverflowCount();
+                writeBehindCriticalOverflowCount = e.getWriteBehindCriticalOverflowCount();
+                writeBehindErrorRetryCount = e.getWriteBehindErrorRetryCount();
+                writeBehindBufferSize = e.getWriteBehindBufferSize();
+
+                keyType = e.getKeyType();
+                valueType = e.getValueType();
+                isStoreByValue = e.isStoreByValue();
+                isStatisticsEnabled = e.isStatisticsEnabled();
+                isManagementEnabled = e.isManagementEnabled();
+                isReadThrough = e.isReadThrough();
+                isWriteThrough = e.isWriteThrough();
+
+                first = false;
+            }
+
+            reads += e.getCacheGets();
+            puts += e.getCachePuts();
+            hits += e.getCacheHits();
+            misses += e.getCacheHits();
+            txCommits += e.getCacheTxCommits();
+            txRollbacks += e.getCacheTxRollbacks();
+            evicts += e.getCacheEvictions();
+            removes += e.getCacheRemovals();
+
+            putAvgTimeNanos += e.getAveragePutTime();
+            getAvgTimeNanos += e.getAverageGetTime();
+            removeAvgTimeNanos += e.getAverageRemoveTime();
+            commitAvgTimeNanos += e.getAverageTxCommitTime();
+            rollbackAvgTimeNanos += e.getAverageTxRollbackTime();
+
+            offHeapEntriesCount += e.getOffHeapEntriesCount();
+            offHeapAllocatedSize += e.getOffHeapAllocatedSize();
+            keySize += e.getKeySize();
+            dhtEvictQueueCurrentSize += e.getDhtEvictQueueCurrentSize();
+            txThreadMapSize += e.getTxThreadMapSize();
+            txXidMapSize += e.getTxXidMapSize();
+            txCommitQueueSize += e.getTxCommitQueueSize();
+            txPrepareQueueSize += e.getTxPrepareQueueSize();
+            txStartVersionCountsSize += e.getTxStartVersionCountsSize();
+            txCommittedVersionsSize += e.getTxCommittedVersionsSize();
+            txRolledbackVersionsSize += e.getTxRolledbackVersionsSize();
+            txDhtThreadMapSize += e.getTxDhtThreadMapSize();
+            txDhtXidMapSize += e.getTxDhtXidMapSize();
+            txDhtCommitQueueSize += e.getTxDhtCommitQueueSize();
+            txDhtPrepareQueueSize += e.getTxDhtPrepareQueueSize();
+            txDhtStartVersionCountsSize += e.getTxDhtStartVersionCountsSize();
+            txDhtCommittedVersionsSize += e.getTxDhtCommittedVersionsSize();
+            txDhtRolledbackVersionsSize += e.getTxDhtRolledbackVersionsSize();
+        }
+
+        putAvgTimeNanos /= metrics.size();
+        getAvgTimeNanos /= metrics.size();
+        removeAvgTimeNanos /= metrics.size();
+        commitAvgTimeNanos /= metrics.size();
+        rollbackAvgTimeNanos /= metrics.size();
+    }
+
+    /**
+     * Gets last update time of this node metrics.
+     *
+     * @return Last update time.
+     */
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    /**
+     * Sets last update time.
+     *
+     * @param lastUpdateTime Last update time.
+     */
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
     /** {@inheritDoc} */
     @Override public long getCacheHits() {
         return hits;
@@ -266,9 +397,8 @@ public class CacheMetricsSnapshot implements CacheMetrics {
 
     /** {@inheritDoc} */
     @Override public float getCacheMissPercentage() {
-        if (misses == 0 || reads == 0) {
+        if (misses == 0 || reads == 0)
             return 0;
-        }
 
         return (float) misses / reads * 100.0f;
     }
@@ -281,6 +411,14 @@ public class CacheMetricsSnapshot implements CacheMetrics {
     /** {@inheritDoc} */
     @Override public long getCachePuts() {
         return puts;
+    }
+
+    /**
+     * Sets the total number of puts to the cache.
+     * @param puts The total number of puts to the cache.
+     */
+    public void setCachePuts(long puts) {
+        this.puts = puts;
     }
 
     /** {@inheritDoc} */
@@ -301,6 +439,15 @@ public class CacheMetricsSnapshot implements CacheMetrics {
     /** {@inheritDoc} */
     @Override public float getAveragePutTime() {
         return putAvgTimeNanos;
+    }
+
+    /**
+     * Sets the mean time to execute puts.
+     *
+     * @param putAvgTimeNanos The time in µs.
+     */
+    public void setAveragePutTime(float putAvgTimeNanos) {
+        this.putAvgTimeNanos = putAvgTimeNanos;
     }
 
     /** {@inheritDoc} */
@@ -521,5 +668,121 @@ public class CacheMetricsSnapshot implements CacheMetrics {
     /** {@inheritDoc} */
     @Override public String toString() {
         return S.toString(CacheMetricsSnapshot.class, this);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeLong(reads);
+        out.writeLong(puts);
+        out.writeLong(hits);
+        out.writeLong(misses);
+        out.writeLong(txCommits);
+        out.writeLong(txRollbacks);
+        out.writeLong(evicts);
+        out.writeLong(removes);
+
+        out.writeFloat(putAvgTimeNanos);
+        out.writeFloat(getAvgTimeNanos);
+        out.writeFloat(removeAvgTimeNanos);
+        out.writeFloat(commitAvgTimeNanos);
+        out.writeFloat(rollbackAvgTimeNanos);
+
+        U.writeUTFStringNullable(out, cacheName);
+        out.writeLong(overflowSize);
+        out.writeLong(offHeapEntriesCount);
+        out.writeLong(offHeapAllocatedSize);
+        out.writeInt(size);
+        out.writeInt(keySize);
+        out.writeBoolean(isEmpty);
+        out.writeInt(dhtEvictQueueCurrentSize);
+        out.writeInt(txThreadMapSize);
+        out.writeInt(txXidMapSize);
+        out.writeInt(txCommitQueueSize);
+        out.writeInt(txPrepareQueueSize);
+        out.writeInt(txStartVersionCountsSize);
+        out.writeInt(txCommittedVersionsSize);
+        out.writeInt(txRolledbackVersionsSize);
+        out.writeInt(txDhtThreadMapSize);
+        out.writeInt(txDhtXidMapSize);
+        out.writeInt(txDhtCommitQueueSize);
+        out.writeInt(txDhtPrepareQueueSize);
+        out.writeInt(txDhtStartVersionCountsSize);
+        out.writeInt(txDhtCommittedVersionsSize);
+        out.writeInt(txDhtRolledbackVersionsSize);
+        out.writeBoolean(isWriteBehindEnabled);
+        out.writeInt(writeBehindFlushSize);
+        out.writeInt(writeBehindFlushThreadCount);
+        out.writeLong(writeBehindFlushFrequency);
+        out.writeInt(writeBehindStoreBatchSize);
+        out.writeInt(writeBehindTotalCriticalOverflowCount);
+        out.writeInt(writeBehindCriticalOverflowCount);
+        out.writeInt(writeBehindErrorRetryCount);
+        out.writeInt(writeBehindBufferSize);
+
+        out.writeUTF(keyType);
+        out.writeUTF(valueType);
+        out.writeBoolean(isStoreByValue);
+        out.writeBoolean(isStatisticsEnabled);
+        out.writeBoolean(isManagementEnabled);
+        out.writeBoolean(isReadThrough);
+        out.writeBoolean(isWriteThrough);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        reads = in.readLong();
+        puts = in.readLong();
+        hits = in.readLong();
+        misses = in.readLong();
+        txCommits = in.readLong();
+        txRollbacks = in.readLong();
+        evicts = in.readLong();
+        removes = in.readLong();
+
+        putAvgTimeNanos = in.readFloat();
+        getAvgTimeNanos = in.readFloat();
+        removeAvgTimeNanos = in.readFloat();
+        commitAvgTimeNanos = in.readFloat();
+        rollbackAvgTimeNanos = in.readFloat();
+
+        cacheName = U.readUTFStringNullable(in);
+        overflowSize = in.readLong();
+        offHeapEntriesCount = in.readLong();
+        offHeapAllocatedSize = in.readLong();
+        size = in.readInt();
+        keySize = in.readInt();
+        isEmpty = in.readBoolean();
+        dhtEvictQueueCurrentSize = in.readInt();
+        txThreadMapSize = in.readInt();
+        txXidMapSize = in.readInt();
+        txCommitQueueSize = in.readInt();
+        txPrepareQueueSize = in.readInt();
+        txStartVersionCountsSize = in.readInt();
+        txCommittedVersionsSize = in.readInt();
+        txRolledbackVersionsSize = in.readInt();
+        txDhtThreadMapSize = in.readInt();
+        txDhtXidMapSize = in.readInt();
+        txDhtCommitQueueSize = in.readInt();
+        txDhtPrepareQueueSize = in.readInt();
+        txDhtStartVersionCountsSize = in.readInt();
+        txDhtCommittedVersionsSize = in.readInt();
+        txDhtRolledbackVersionsSize = in.readInt();
+        isWriteBehindEnabled = in.readBoolean();
+        writeBehindFlushSize = in.readInt();
+        writeBehindFlushThreadCount = in.readInt();
+        writeBehindFlushFrequency = in.readLong();
+        writeBehindStoreBatchSize = in.readInt();
+        writeBehindTotalCriticalOverflowCount = in.readInt();
+        writeBehindCriticalOverflowCount = in.readInt();
+        writeBehindErrorRetryCount = in.readInt();
+        writeBehindBufferSize = in.readInt();
+
+        keyType = in.readUTF();
+        valueType = in.readUTF();
+        isStoreByValue = in.readBoolean();
+        isStatisticsEnabled = in.readBoolean();
+        isManagementEnabled = in.readBoolean();
+        isReadThrough = in.readBoolean();
+        isWriteThrough = in.readBoolean();
     }
 }

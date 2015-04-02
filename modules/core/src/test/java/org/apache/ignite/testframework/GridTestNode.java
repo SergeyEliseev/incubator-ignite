@@ -57,7 +57,7 @@ public class GridTestNode extends GridMetadataAwareAdapter implements ClusterNod
     private ClusterMetrics metrics;
 
     /** */
-    private Collection<CacheMetrics> cacheMetrics = Collections.emptyList();
+    private Map<String, CacheMetrics> cacheMetrics = Collections.emptyMap();
 
     /** */
     private long order;
@@ -190,7 +190,7 @@ public class GridTestNode extends GridMetadataAwareAdapter implements ClusterNod
         return metrics;
     }
 
-    @Override public Collection<CacheMetrics> cacheMetrics() {
+    @Override public Map<String, CacheMetrics> cacheMetrics() {
         return cacheMetrics;
     }
 

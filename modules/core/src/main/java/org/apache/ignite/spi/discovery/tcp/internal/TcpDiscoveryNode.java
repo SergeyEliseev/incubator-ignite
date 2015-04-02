@@ -76,7 +76,7 @@ public class TcpDiscoveryNode extends GridMetadataAwareAdapter implements Cluste
 
     /** Node cache metrics. */
     @GridToStringExclude
-    private volatile Collection<CacheMetrics> cacheMetrics;
+    private volatile Map<String, CacheMetrics> cacheMetrics;
 
     /** Node order in the topology. */
     private volatile long order;
@@ -215,7 +215,7 @@ public class TcpDiscoveryNode extends GridMetadataAwareAdapter implements Cluste
     }
 
     /** {@inheritDoc} */
-    @Override public Collection<CacheMetrics> cacheMetrics() {
+    @Override public Map<String, CacheMetrics> cacheMetrics() {
         if (metricsProvider != null)
             cacheMetrics = metricsProvider.cacheMetrics();
 
@@ -227,7 +227,7 @@ public class TcpDiscoveryNode extends GridMetadataAwareAdapter implements Cluste
      *
      * @param cacheMetrics Cache metrics.
      */
-    public void setCacheMetrics(Collection<CacheMetrics> cacheMetrics) {
+    public void setCacheMetrics(Map<String, CacheMetrics> cacheMetrics) {
         assert cacheMetrics != null;
 
         this.cacheMetrics = cacheMetrics;

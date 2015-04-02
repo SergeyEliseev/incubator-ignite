@@ -159,7 +159,7 @@ public interface ClusterNode {
      *
      * @return Runtime metrics snapshots for this node.
      */
-    public Collection<CacheMetrics> cacheMetrics();
+    public Map<String, CacheMetrics> cacheMetrics();
 
     /**
      * Gets all node attributes. Attributes are assigned to nodes at startup

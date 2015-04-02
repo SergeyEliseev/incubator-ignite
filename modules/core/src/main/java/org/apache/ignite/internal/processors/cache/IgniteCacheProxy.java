@@ -140,6 +140,21 @@ public class IgniteCacheProxy<K, V> extends AsyncSupportAdapter<IgniteCache<K, V
     }
 
     /** {@inheritDoc} */
+    @Override public CacheMetrics metrics(ClusterGroup grp) {
+        List<CacheMetrics> metrics = new ArrayList<>(grp.nodes().size());
+
+        for (ClusterNode node : grp.nodes())
+            metrics.add(node.cacheMetrics().get(getName()));
+
+        if (F.isEmpty(metrics)) {
+            //TODO: what actually need to be returned?
+            return new CacheMetricsSnapshot();
+        }
+
+        return new CacheMetricsSnapshot(metrics);
+    }
+
+    /** {@inheritDoc} */
     @Override public CacheMetricsMXBean mxBean() {
         GridCacheProjectionImpl<K, V> prev = gate.enter(prj);
 

@@ -376,7 +376,7 @@ public class GridDiscoverySelfTest extends GridCommonAbstractTest {
         }
 
         /** {@inheritDoc} */
-        @Override public Collection<CacheMetrics> cacheMetrics() {
+        @Override public Map<String, CacheMetrics> cacheMetrics() {
             return null;
         }
 
