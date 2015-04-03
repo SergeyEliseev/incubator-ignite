@@ -517,9 +517,9 @@ public interface IgniteCache<K, V> extends javax.cache.Cache<K, V>, IgniteAsyncS
     /**
      * Gets snapshot metrics for caches in cluster group.
      * @param grp Cluster group.
-     * @return Cache metrics.
+     * @return Cache metrics. {@code Null} if cluster group is empty.
      */
-    public CacheMetrics metrics(ClusterGroup grp);
+    @Nullable public CacheMetrics metrics(ClusterGroup grp);
 
     /**
      * Gets MxBean for this cache.

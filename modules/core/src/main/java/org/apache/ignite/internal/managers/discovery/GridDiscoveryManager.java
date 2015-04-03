@@ -648,16 +648,16 @@ public class GridDiscoveryManager extends GridManagerAdapter<DiscoverySpi> {
             }
 
             /** {@inheritDoc} */
-            @Override public Map<String, CacheMetrics> cacheMetrics() {
-                Collection<GridCache<?, ?>> caches = ctx.cache().caches();
+            @Override public Map<Integer, CacheMetrics> cacheMetrics() {
+                Collection<GridCacheAdapter<?, ?>> caches = ctx.cache().internalCaches();
 
                 if (F.isEmpty(caches))
                     return Collections.emptyMap();
 
-                Map<String, CacheMetrics> metrics = U.newHashMap(caches.size());
+                Map<Integer, CacheMetrics> metrics = U.newHashMap(caches.size());
 
-                for (GridCache<?, ?> cache : caches)
-                    metrics.put(cache.name(), cache.metrics());
+                for (GridCacheAdapter<?, ?> cache : caches)
+                    metrics.put(cache.context().cacheId(), cache.metrics());
 
                 return metrics;
             }

@@ -1113,7 +1113,7 @@ public class TcpClientDiscoverySpi extends TcpDiscoverySpiAdapter implements Tcp
                 }
 
                 if (msg.hasCacheMetrics()) {
-                    for (Map.Entry<UUID, Map<String, CacheMetrics>> e : msg.cacheMetrics().entrySet())
+                    for (Map.Entry<UUID, Map<Integer, CacheMetrics>> e : msg.cacheMetrics().entrySet())
                         updateCacheMetrics(e.getKey(), e.getValue(), tstamp);
                 }
             }
@@ -1185,7 +1185,7 @@ public class TcpClientDiscoverySpi extends TcpDiscoverySpiAdapter implements Tcp
          * @param cacheMetrics Cache metrics.
          * @param tstamp Timestamp.
          */
-        private void updateCacheMetrics(UUID nodeId, Map<String, CacheMetrics> cacheMetrics, long tstamp) {
+        private void updateCacheMetrics(UUID nodeId, Map<Integer, CacheMetrics> cacheMetrics, long tstamp) {
             assert nodeId != null;
             assert cacheMetrics != null;
 

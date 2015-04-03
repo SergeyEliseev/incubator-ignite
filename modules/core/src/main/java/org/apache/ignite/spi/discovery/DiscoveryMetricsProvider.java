@@ -45,5 +45,5 @@ public interface DiscoveryMetricsProvider {
      *
      * @return metrics data about all caches on local node.
      */
-    public Map<String, CacheMetrics> cacheMetrics();
+    public Map<Integer, CacheMetrics> cacheMetrics();
 }

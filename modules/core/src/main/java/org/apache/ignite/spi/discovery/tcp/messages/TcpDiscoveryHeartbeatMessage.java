@@ -56,7 +56,7 @@ public class TcpDiscoveryHeartbeatMessage extends TcpDiscoveryAbstractMessage {
 
     /** Cahce metrics by node. */
     @GridToStringExclude
-    private Map<UUID, Map<String, CacheMetrics>> cacheMetrics;
+    private Map<UUID, Map<Integer, CacheMetrics>> cacheMetrics;
 
     /**
      * Public default no-arg constructor for {@link Externalizable} interface.
@@ -98,7 +98,7 @@ public class TcpDiscoveryHeartbeatMessage extends TcpDiscoveryAbstractMessage {
      * @param nodeId Node ID.
      * @param metrics Node cache metrics.
      */
-    public void setCacheMetrics(UUID nodeId, Map<String, CacheMetrics> metrics) {
+    public void setCacheMetrics(UUID nodeId, Map<Integer, CacheMetrics> metrics) {
         assert nodeId != null;
         assert metrics != null;
         assert !this.cacheMetrics.containsKey(nodeId);
@@ -158,7 +158,7 @@ public class TcpDiscoveryHeartbeatMessage extends TcpDiscoveryAbstractMessage {
      *
      * @return Cache metrics map.
      */
-    public Map<UUID, Map<String, CacheMetrics>> cacheMetrics() {
+    public Map<UUID, Map<Integer, CacheMetrics>> cacheMetrics() {
         return cacheMetrics;
     }
 
@@ -230,14 +230,14 @@ public class TcpDiscoveryHeartbeatMessage extends TcpDiscoveryAbstractMessage {
         out.writeInt(cacheMetrics.size());
 
         if (!cacheMetrics.isEmpty()) {
-            for (Map.Entry<UUID, Map<String, CacheMetrics>> e : cacheMetrics.entrySet()) {
+            for (Map.Entry<UUID, Map<Integer, CacheMetrics>> e : cacheMetrics.entrySet()) {
                 U.writeUuid(out, e.getKey());
 
-                Map<String, CacheMetrics> ms = e.getValue();
+                Map<Integer, CacheMetrics> ms = e.getValue();
 
                 out.writeInt(ms == null ? 0 : ms.size());
 
-                for (Map.Entry<String, CacheMetrics> m : ms.entrySet())
+                for (Map.Entry<Integer, CacheMetrics> m : ms.entrySet())
                     out.writeObject(m.getValue());
             }
         }
@@ -265,11 +265,11 @@ public class TcpDiscoveryHeartbeatMessage extends TcpDiscoveryAbstractMessage {
 
             int size = in.readInt();
 
-            Map<String, CacheMetrics> ms = U.newHashMap(size);
+            Map<Integer, CacheMetrics> ms = U.newHashMap(size);
 
             for (int j = 0; j < size; j++) {
                 CacheMetricsSnapshot m = (CacheMetricsSnapshot) in.readObject();
-                ms.put(m.name(), m);
+                ms.put(m.id(), m);
             }
 
             cacheMetrics.put(uuid, ms);
