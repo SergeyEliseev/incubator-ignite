@@ -789,7 +789,7 @@ public abstract class IgfsAbstractSelfTest extends IgfsCommonAbstractTest {
         fail("https://issues.apache.org/jira/browse/IGNITE-586");
         
         IgniteKernal grid = (IgniteKernal)G.ignite("grid");
-        GridCache cache = grid.internalCache("dataCache");
+        GridCacheAdapter cache = grid.internalCache("dataCache");
 
         if (dual)
             create(igfsSecondary, paths(DIR, SUBDIR, DIR_NEW, SUBDIR_NEW), paths(FILE, FILE_NEW));
